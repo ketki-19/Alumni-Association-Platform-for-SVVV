@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVVV Alumni Association Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e3a8a;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.1);
+        }
+
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #1e3a8a, #3b82f6);
+        }
+
+        .page-section { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .page-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bg-beige-50 { background-color: #FDFBF7; }
+
+        /* Modal Styles */
+        .modal { display: none; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+
+        /* Toast Styles */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .toast {
+            min-width: 250px;
+            margin-top: 10px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out forwards, fadeOut 0.5s ease-in 2.5s forwards;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .toast.success { background-color: #10B981; }
+        .toast.error { background-color: #EF4444; }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Sticky Navbar -->
+    <nav class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
+            <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold text-xl">SV</div>
+            <h1 class="font-bold text-xl text-blue-900 hidden sm:block">SVVV Alumni</h1>
+        </div>
+
+        <div class="hidden md:flex gap-6 items-center font-semibold text-blue-800">
+            <a href="#" onclick="showPage('home')" class="hover:text-blue-500 transition">Home</a>
+            <a href="#" onclick="showPage('directory')" class="hover:text-blue-500 transition">Directory</a>
+            <a href="#" onclick="showPage('jobs')" class="hover:text-blue-500 transition">Jobs</a>
+            <a href="#" onclick="showPage('events')" class="hover:text-blue-500 transition">Events</a>
+            <button id="nav-login-btn" onclick="showPage('login')" class="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition shadow-lg">Login</button>
+        </div>
+
+        <button class="md:hidden text-blue-900 text-2xl focus:outline-none" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 glass z-40 flex flex-col items-center justify-center gap-8 text-2xl font-bold text-blue-900">
+        <button class="absolute top-6 right-6 text-3xl" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
+        <a href="#" onclick="showPage('home'); toggleMenu()">Home</a>
+        <a href="#" onclick="showPage('directory'); toggleMenu()">Directory</a>
+        <a href="#" onclick="showPage('jobs'); toggleMenu()">Job Portal</a>
+        <a href="#" onclick="showPage('events'); toggleMenu()">Events</a>
+        <a href="#" id="mobile-login-btn" onclick="showPage('login'); toggleMenu()" class="text-blue-600">Login</a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- HOME PAGE -->
+        <section id="home" class="page-section active">
+            <div class="bg-beige-50 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-10 shadow-sm border border-gray-100 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+                
+                <div class="flex-1 z-10">
+                    <h2 class="text-4xl md:text-6xl font-bold mb-6 text-blue-950 leading-tight">
+                        Connecting Alumni, <br><span class="text-gradient">Inspiring Future Generations.</span>
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                        Join the official Shri Vaishnav Vidyapeeth Vishwavidyalaya global network. Connect, mentor, and grow together.
+                    </p>
+                    <div class="flex gap-4">
+                        <button onclick="showPage('login')" class="bg-blue-900 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-800 transition shadow-lg">Join Network</button>
+                        <button onclick="showPage('events')" class="glass text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-white transition border border-blue-200">Upcoming Events</button>
+                    </div>
+                </div>
+                <div class="flex-1 z-10 w-full">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="University Students" class="rounded-2xl shadow-2xl w-full object-cover h-80">
+                </div>
+            </div>
+
+            <!-- Success Stories -->
+            <div class="mt-20">
+                <h3 class="text-3xl font-bold text-center text-blue-900 mb-12">Featured Alumni Success</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Story 1 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Rahul Sharma">
+                        <h4 class="text-xl font-bold text-blue-900">Rahul Sharma</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">Software Engineer @ Google</p>
+                        <p class="text-gray-600 text-sm">"SVVV gave me the foundation in algorithms that helped me crack top tech interviews."</p>
+                    </div>
+                    <!-- Story 2 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Priya Verma">
+                        <h4 class="text-xl font-bold text-blue-900">Priya Verma</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">Data Scientist @ Microsoft</p>
+                        <p class="text-gray-600 text-sm">"The mentorship I received from senior alumni was the stepping stone for my career."</p>
+                    </div>
+                    <!-- Story 3 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Ankit Patel">
+                        <h4 class="text-xl font-bold text-blue-900">Ankit Patel</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">Founder @ TechEdge</p>
+                        <p class="text-gray-600 text-sm">"Starting my own company was tough, but the SVVV alumni network provided initial support."</p>
+                    </div>
+                    <!-- Story 4 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Neha Joshi">
+                        <h4 class="text-xl font-bold text-blue-900">Neha Joshi</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">AI Researcher @ OpenAI</p>
+                        <p class="text-gray-600 text-sm">"My journey from SVVV labs to global AI research was fueled by continuous learning."</p>
+                    </div>
+                    <!-- Story 5 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Vikram Singh">
+                        <h4 class="text-xl font-bold text-blue-900">Vikram Singh</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">Civil Engineer @ L&T</p>
+                        <p class="text-gray-600 text-sm">"The practical exposure during civil site visits at SVVV shaped my engineering perspective."</p>
+                    </div>
+                    <!-- Story 6 -->
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Sneha Rao">
+                        <h4 class="text-xl font-bold text-blue-900">Sneha Rao</h4>
+                        <p class="text-sm font-semibold text-blue-600 mb-3">Consultant @ Deloitte</p>
+                        <p class="text-gray-600 text-sm">"Networking through SVVV alumni events directly landed me my dream consulting job."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGIN PAGE -->
+        <section id="login" class="page-section">
+            <div class="max-w-md mx-auto mt-10">
+                <div class="glass-card p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4">SV</div>
+                        <h2 class="text-2xl font-bold text-blue-900">Portal Login</h2>
+                        <p class="text-gray-500 text-sm">Student • Alumni</p>
+                    </div>
+                    
+                    <form onsubmit="handleLogin(event)" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Number</label>
+                            <input type="text" id="enrollment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" placeholder="e.g. EN001 or ST001" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition shadow-lg">Sign In</button>
+                    </form>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page-section">
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Sidebar Profile -->
+                <div class="w-full md:w-1/3">
+                    <div class="glass-card p-6 text-center">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-100 object-cover" alt="Profile">
+                        <h3 id="dash-name" class="text-2xl font-bold text-blue-900">User Name</h3>
+                        <p id="dash-role" class="text-blue-600 font-medium uppercase tracking-wide text-sm mt-1">Role</p>
+                        <p class="text-gray-500 text-sm mt-2"><i class="fas fa-map-marker-alt"></i> SVVV Campus</p>
+                        
+                        <div class="mt-6 flex justify-center gap-4">
+                            <button onclick="logout()" class="w-full border border-red-200 text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Feed -->
+                <div class="w-full md:w-2/3 space-y-6">
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4 border-b pb-2">Welcome to your Portal</h3>
+                        <p class="text-gray-600">Navigate to Jobs, Directory, or Events using the menu above.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ALUMNI DIRECTORY -->
+        <section id="directory" class="page-section">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 class="text-3xl font-bold text-blue-900">Alumni & Student Directory</h2>
+                <button onclick="openModal('addDirectoryModal')" class="bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-800 transition"><i class="fas fa-user-plus mr-2"></i>Add to Directory</button>
+            </div>
+            
+            <div class="glass-card p-4 mb-8 flex flex-col sm:flex-row gap-4">
+                <input type="text" id="dir-search" placeholder="Search by name or skills..." class="flex-grow px-4 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500" onkeyup="filterDirectory()">
+                <select id="dir-batch" class="px-4 py-2 rounded-lg border border-gray-200 outline-none text-gray-600" onchange="filterDirectory()">
+                    <option value="All">All Batches</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
+
+            <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Directory cards populated by JS -->
+            </div>
+        </section>
+
+        <!-- JOB PORTAL -->
+        <section id="jobs" class="page-section">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-blue-900">Engineering Opportunities</h2>
+                <div id="alumni-job-controls" class="hidden gap-3">
+                    <button onclick="openModal('manageBlacklistModal')" class="border-2 border-blue-900 text-blue-900 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50"><i class="fas fa-ban mr-2"></i>Manage Blacklist</button>
+                    <button onclick="openModal('postJobModal')" class="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800"><i class="fas fa-plus mr-2"></i>Post a Job</button>
+                </div>
+            </div>
+            <div id="jobs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Jobs populated by JS -->
+            </div>
+        </section>
+
+        <!-- EVENTS MANAGEMENT -->
+        <section id="events" class="page-section">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-blue-900">Events & Meets</h2>
+                <button id="post-event-btn" onclick="openModal('postEventModal')" class="hidden bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800"><i class="fas fa-calendar-plus mr-2"></i>Create Event</button>
+            </div>
+            <div id="events-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Events populated by JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h2 class="font-bold text-xl text-blue-900">SVVV Alumni Network</h2>
+                <p class="text-sm text-gray-500">© 2026 Shri Vaishnav Vidyapeeth Vishwavidyalaya. All rights reserved.</p>
+            </div>
+            <div class="flex gap-4 text-blue-900 text-xl">
+                <a href="https://www.linkedin.com/school/shri-vaishnav-vidyapeeth-vishwavidyalaya/" target="_blank" class="hover:text-blue-600 transition"><i class="fab fa-linkedin"></i></a>
+                <a href="https://twitter.com/svvv_indore" target="_blank" class="hover:text-blue-600 transition"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.facebook.com/svvvindore/" target="_blank" class="hover:text-blue-600 transition"><i class="fab fa-facebook"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Add to Directory Modal -->
+    <div id="addDirectoryModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Join the Directory</h3>
+                <button onclick="closeModal('addDirectoryModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="handleAddToDirectory(event)" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="dir-new-name" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Batch Year</label>
+                        <input type="number" id="dir-new-batch" required placeholder="e.g. 2026" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Role / Company</label>
+                    <input type="text" id="dir-new-role" required placeholder="e.g. Student @ SVVV or SDE @ Amazon" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="block text-sm font-medium text-gray-700">Thoughts / Experience</label>
+                        <span id="wordCountDisplay" class="text-xs text-blue-600 font-bold">0/500 words</span>
+                    </div>
+                    <textarea id="dir-new-thoughts" required rows="4" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500" placeholder="Share your experience..." oninput="enforceWordLimit(this, 500, 'wordCountDisplay')"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800">Publish Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Apply Job Modal -->
+    <div id="applyJobModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Apply for Opportunity</h3>
+                <button onclick="closeModal('applyJobModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="submitJobApplication(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Resume Link (Google Drive/Portfolio)</label>
+                    <input type="url" required placeholder="https://..." class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Why should we hire you?</label>
+                    <textarea required rows="3" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800">Submit Application</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post Job Modal (Alumni Only) -->
+    <div id="postJobModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Post New Job</h3>
+                <button onclick="closeModal('postJobModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="handlePostJob(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                    <input type="text" id="job-title" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                        <input type="text" id="job-company" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input type="text" id="job-location" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                    <textarea id="job-desc" required rows="3" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800">Publish Job</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Blacklist Modal (Alumni Only) -->
+    <div id="manageBlacklistModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-red-600 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg"><i class="fas fa-ban mr-2"></i>Manage Blacklist</h3>
+                <button onclick="closeModal('manageBlacklistModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Blacklisted enrollment numbers cannot apply for jobs.</p>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="block-id" placeholder="Enter Enrollment (e.g. ST010)" class="flex-grow px-3 py-2 border rounded outline-none">
+                    <button onclick="addToBlacklist()" class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700">Block</button>
+                </div>
+                <h4 class="font-bold text-gray-800 border-b pb-2 mb-2">Currently Blacklisted:</h4>
+                <ul id="blacklist-ui" class="space-y-2 text-sm text-red-600 font-semibold bg-red-50 p-3 rounded border border-red-100">
+                    <!-- Blacklist rendered here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Ticket / RSVP Modal -->
+    <div id="rsvpModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Event RSVP / Book Ticket</h3>
+                <button onclick="closeModal('rsvpModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="submitRSVP(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+                        <input type="number" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="text" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post Event Modal -->
+    <div id="postEventModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Create New Event</h3>
+                <button onclick="closeModal('postEventModal')" class="text-white hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="handlePostEvent(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
+                    <input type="text" id="ev-name" required class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="text" id="ev-date" required placeholder="e.g. Oct 15, 2026" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input type="text" id="ev-loc" required placeholder="e.g. SVVV Audi" class="w-full px-3 py-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800">Publish Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // State
+        let currentUser = null; // null = guest, {id, role} if logged in
+        let blacklistedStudents = ['ST002', 'ST003', 'ST004', 'ST005'];
+
+        // Core Functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+            
+            if(pageId === 'directory') renderDirectory();
+            if(pageId === 'jobs') renderJobs();
+            if(pageId === 'events') renderEvents();
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Enforce exactly 500 words limit
+        function enforceWordLimit(textarea, limit, displayId) {
+            const text = textarea.value.trim();
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            const display = document.getElementById(displayId);
+            
+            if (words.length > limit) {
+                // If over limit, truncate the text to exactly 'limit' words
+                textarea.value = words.slice(0, limit).join(" ");
+                display.innerText = `${limit}/${limit} words (Max Limit Reached!)`;
+                display.classList.remove('text-blue-600');
+                display.classList.add('text-red-600');
+            } else {
+                display.innerText = `${words.length}/${limit} words`;
+                display.classList.remove('text-red-600');
+                display.classList.add('text-blue-600');
+            }
+        }
+
+        // Authentication
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('enrollment').value.toUpperCase();
+            
+            if (id === 'EN001') {
+                currentUser = { id: id, role: 'alumni', name: 'Rahul Sharma' };
+            } else if (id.startsWith('ST')) {
+                currentUser = { id: id, role: 'student', name: 'SVVV Student' };
+            } else {
+                showToast("Invalid ID format. Use ENxxx or STxxx", "error");
+                return;
+            }
+
+            document.getElementById('nav-login-btn').innerText = "Dashboard";
+            document.getElementById('nav-login-btn').setAttribute('onclick', "showPage('dashboard')");
+            document.getElementById('dash-name').innerText = currentUser.name;
+            document.getElementById('dash-role').innerText = currentUser.role;
+            
+            // Toggle Alumni Controls
+            if(currentUser.role === 'alumni') {
+                document.getElementById('alumni-job-controls').classList.remove('hidden');
+                document.getElementById('alumni-job-controls').classList.add('flex');
+                document.getElementById('post-event-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('alumni-job-controls').classList.add('hidden');
+                document.getElementById('alumni-job-controls').classList.remove('flex');
+                document.getElementById('post-event-btn').classList.add('hidden');
+            }
+
+            renderBlacklist();
+            closeModal('login');
+            showPage('dashboard');
+            showToast("Login Successful!");
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('nav-login-btn').innerText = "Login";
+            document.getElementById('nav-login-btn').setAttribute('onclick', "showPage('login')");
+            document.getElementById('enrollment').value = '';
+            document.getElementById('password').value = '';
+            showPage('home');
+            showToast("Logged Out Successfully");
+        }
+
+        // ================= DIRECTORY MODULE =================
+        let directoryData = [
+            // 2026 Batch
+            { name: "Aarav Patel", batch: "2026", role: "Student @ SVVV", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Looking forward to learning React!" },
+            { name: "Diya Sharma", batch: "2026", role: "Student @ SVVV", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Passionate about AI and ML." },
+            { name: "Kabir Singh", batch: "2026", role: "Student @ SVVV", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Building robotics projects." },
+            { name: "Ananya Iyer", batch: "2026", role: "Student @ SVVV", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Tech enthusiast and debater." },
+            // 2025 Batch
+            { name: "Rohan Gupta", batch: "2025", role: "Intern @ TCS", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "SVVV prepared me well for the corporate world." },
+            { name: "Meera Reddy", batch: "2025", role: "Intern @ Wipro", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Focused on cloud architecture." },
+            { name: "Aditya Verma", batch: "2025", role: "Freelance Dev", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "I build full-stack web apps." },
+            { name: "Sanya Kapoor", batch: "2025", role: "Student @ SVVV", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Cybersecurity is the future." },
+            // 2024 Batch
+            { name: "Ishaan Joshi", batch: "2024", role: "SDE 1 @ Amazon", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "The alumni network helped me get referrals!" },
+            { name: "Pooja Desai", batch: "2024", role: "Data Analyst", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Love playing with big data." },
+            { name: "Varun Nair", batch: "2024", role: "UI/UX Designer", img: "https://images.unsplash.com/photo-1504257432389-52343af06ae3?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Design makes technology accessible." },
+            { name: "Kriti Sen", batch: "2024", role: "Product Manager", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Managing tech teams in Bangalore." },
+            // 2023 Batch
+            { name: "Arjun Mehta", batch: "2023", role: "Senior Dev @ Google", img: "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Always happy to mentor juniors from SVVV." },
+            { name: "Sneha Rao", batch: "2023", role: "Consultant", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Problem solving is my passion." },
+            { name: "Yash Singhal", batch: "2023", role: "Founder @ TechInc", img: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Startup life is tough but rewarding." },
+            { name: "Tara Menon", batch: "2023", role: "Cloud Engineer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", thought: "Scaling infrastructure globally." }
+        ];
+
+        function renderDirectory(data = directoryData) {
+            const grid = document.getElementById('directory-grid');
+            grid.innerHTML = data.map(u => `
+                <div class="glass-card p-6 text-center">
+                    <img src="${u.img}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover shadow-md">
+                    <h4 class="font-bold text-lg text-blue-900">${u.name}</h4>
+                    <p class="text-sm font-semibold text-gray-700">${u.role}</p>
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1 mb-3">Batch ${u.batch}</span>
+                    <p class="text-xs text-gray-500 italic mb-4 line-clamp-2">"${u.thought}"</p>
+                    <button onclick="showToast('Connection Request Sent to ${u.name}')" class="w-full bg-blue-50 text-blue-700 border border-blue-200 py-2 rounded hover:bg-blue-600 hover:text-white transition text-sm font-semibold">Connect</button>
+                </div>
+            `).join('');
+        }
+
+        function filterDirectory() {
+            const search = document.getElementById('dir-search').value.toLowerCase();
+            const batch = document.getElementById('dir-batch').value;
+            const filtered = directoryData.filter(u => {
+                const matchSearch = u.name.toLowerCase().includes(search) || u.role.toLowerCase().includes(search);
+                const matchBatch = batch === 'All' || u.batch === batch;
+                return matchSearch && matchBatch;
+            });
+            renderDirectory(filtered);
+        }
+
+        function handleAddToDirectory(e) {
+            e.preventDefault();
+            const newProfile = {
+                name: document.getElementById('dir-new-name').value,
+                batch: document.getElementById('dir-new-batch').value,
+                role: document.getElementById('dir-new-role').value,
+                thought: document.getElementById('dir-new-thoughts').value,
+                img: "https://ui-avatars.com/api/?name=" + encodeURIComponent(document.getElementById('dir-new-name').value) + "&background=1e3a8a&color=fff"
+            };
+            directoryData.unshift(newProfile); // Add to beginning
+            renderDirectory();
+            closeModal('addDirectoryModal');
+            showToast("Profile Published to Directory!");
+            e.target.reset();
+            document.getElementById('wordCountDisplay').innerText = "0/500 words";
+        }
+
+        // ================= JOBS MODULE =================
+        let jobsData = [
+            { id: 1, title: "Software Engineer (L3)", comp: "Google", loc: "Bangalore", desc: "Looking for full-stack engineer with React/Python. SVVV alumni preferred.", tag: "Actively Hiring" },
+            { id: 2, title: "Data Science Intern", comp: "Microsoft", loc: "Hyderabad", desc: "6-month internship for pre-final year. ML knowledge required.", tag: "Student Opportunity" },
+            { id: 3, title: "Civil Project Engineer", comp: "L&T", loc: "Mumbai", desc: "Site engineer required for infrastructure projects. AutoCAD a must.", tag: "Core Job" },
+            { id: 4, title: "Mechanical Design Engg", comp: "Tata Motors", loc: "Pune", desc: "Design and testing of EV components. Fresher friendly.", tag: "Actively Hiring" },
+            { id: 5, title: "Hardware Systems Engg", comp: "Intel", loc: "Bangalore", desc: "VLSI and embedded systems engineer. Electronics branch preferred.", tag: "Core Job" },
+            { id: 6, title: "Cloud Support Associate", comp: "AWS", loc: "Remote", desc: "Provide technical support for AWS architecture.", tag: "Remote" },
+            { id: 7, title: "System Engineer", comp: "TCS", loc: "Indore", desc: "Mass hiring for 2024/25 batches. Java/C++ basics required.", tag: "Mass Hiring" },
+            { id: 8, title: "Frontend Developer", comp: "Zomato", loc: "Gurgaon", desc: "Build UI components using React. 1+ year experience preferred.", tag: "Hot Job" }
+        ];
+
+        function renderJobs() {
+            const grid = document.getElementById('jobs-grid');
+            grid.innerHTML = jobsData.map(j => `
+                <div class="glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-xl text-blue-900">${j.title}</h4>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">${j.tag}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3 font-semibold"><i class="fas fa-building mr-1"></i> ${j.comp} • <i class="fas fa-map-marker-alt mr-1"></i> ${j.loc}</p>
+                        <p class="text-sm text-gray-600 mb-4">${j.desc}</p>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4 mt-2">
+                        ${getJobButtonHTML(j.id)}
+                        ${(currentUser && currentUser.role === 'alumni') ? `<button onclick="deleteJob(${j.id})" class="text-red-500 hover:text-red-700 text-sm font-bold"><i class="fas fa-trash mr-1"></i>Delete Post</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getJobButtonHTML(jobId) {
+            if (!currentUser) {
+                return `<button onclick="showPage('login')" class="text-gray-500 font-bold hover:text-blue-600 text-sm">Login to Apply</button>`;
+            }
+            if (currentUser.role === 'alumni') {
+                return `<span class="text-gray-400 text-sm">Alumni Mode</span>`;
+            }
+            if (blacklistedStudents.includes(currentUser.id)) {
+                return `<button disabled class="bg-red-100 text-red-500 px-4 py-2 rounded text-sm font-bold cursor-not-allowed"><i class="fas fa-ban mr-1"></i>Blocked</button>`;
+            }
+            return `<button onclick="openModal('applyJobModal')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-bold transition shadow">Apply Now</button>`;
+        }
+
+        function submitJobApplication(e) {
+            e.preventDefault();
+            closeModal('applyJobModal');
+            showToast("Application Submitted Successfully!");
+            e.target.reset();
+        }
+
+        function handlePostJob(e) {
+            e.preventDefault();
+            const newJob = {
+                id: Date.now(),
+                title: document.getElementById('job-title').value,
+                comp: document.getElementById('job-company').value,
+                loc: document.getElementById('job-location').value,
+                desc: document.getElementById('job-desc').value,
+                tag: "New Post"
+            };
+            jobsData.unshift(newJob);
+            renderJobs();
+            closeModal('postJobModal');
+            showToast("Job Posted Successfully!");
+            e.target.reset();
+        }
+
+        function deleteJob(id) {
+            jobsData = jobsData.filter(j => j.id !== id);
+            renderJobs();
+            showToast("Job Post Deleted", "error");
+        }
+
+        function renderBlacklist() {
+            const list = document.getElementById('blacklist-ui');
+            if(list) {
+                list.innerHTML = blacklistedStudents.map(id => `<li><i class="fas fa-user-times mr-2"></i>${id}</li>`).join('');
+            }
+        }
+
+        function addToBlacklist() {
+            const id = document.getElementById('block-id').value.toUpperCase();
+            if(id && !blacklistedStudents.includes(id)) {
+                blacklistedStudents.push(id);
+                renderBlacklist();
+                showToast(`${id} added to Blacklist`, "error");
+                document.getElementById('block-id').value = '';
+                if(document.getElementById('jobs').classList.contains('active')) renderJobs();
+            }
+        }
+
+        // ================= EVENTS MODULE =================
+        let eventsData = [
+            { id: 1, name: "Tech Symposium 2026", date: "Nov 10, 2026", loc: "SVVV Auditorium", color: "blue" },
+            { id: 2, name: "Startup Pitch Deck", date: "Dec 05, 2026", loc: "Incubation Center", color: "green" },
+            { id: 3, name: "Career Workshop", date: "Jan 15, 2027", loc: "Virtual / Zoom", color: "purple" },
+            { id: 4, name: "SPANDAN 2026 - Annual Fest", date: "Feb 20, 2026", loc: "University Ground", color: "blue" },
+            { id: 5, name: "Alumni Leadership Summit", date: "Mar 10, 2026", loc: "Seminar Hall", color: "purple" },
+            { id: 6, name: "Grand Alumni Meet 2026", date: "Apr 25, 2026", loc: "Main Campus", color: "green" }
+        ];
+
+        function renderEvents() {
+            const grid = document.getElementById('events-grid');
+            grid.innerHTML = eventsData.map(ev => {
+                const colorCode = ev.color === 'blue' ? 'blue-600' : (ev.color === 'green' ? 'emerald-600' : 'purple-600');
+                const bgLight = ev.color === 'blue' ? 'bg-blue-50' : (ev.color === 'green' ? 'bg-emerald-50' : 'bg-purple-50');
+                return `
+                <div class="${bgLight} rounded-xl p-6 border-l-4 border-${colorCode} shadow-sm hover:shadow-md transition">
+                    <h4 class="font-bold text-xl text-gray-900 mb-2">${ev.name}</h4>
+                    <p class="text-sm text-gray-600 mb-1"><i class="fas fa-calendar-alt w-5 text-${colorCode}"></i> ${ev.date}</p>
+                    <p class="text-sm text-gray-600 mb-4"><i class="fas fa-map-marker-alt w-5 text-${colorCode}"></i> ${ev.loc}</p>
+                    <button onclick="openModal('rsvpModal')" class="w-full bg-${colorCode} text-white font-semibold py-2 rounded hover:opacity-90">Book Ticket / RSVP</button>
+                </div>
+                `
+            }).join('');
+        }
+
+        function submitRSVP(e) {
+            e.preventDefault();
+            closeModal('rsvpModal');
+            showToast("Ticket Confirmed & Sent to Email!");
+            e.target.reset();
+        }
+
+        function handlePostEvent(e) {
+            e.preventDefault();
+            const newEvent = {
+                id: Date.now(),
+                name: document.getElementById('ev-name').value,
+                date: document.getElementById('ev-date').value,
+                loc: document.getElementById('ev-loc').value,
+                color: "blue"
+            };
+            eventsData.unshift(newEvent);
+            renderEvents();
+            closeModal('postEventModal');
+            showToast("Event Created Successfully!");
+            e.target.reset();
+        }
+
+        // Initialize Home on load
+        window.onload = () => {
+            showPage('home');
+        };
+    </script>
+</body>
+</html>
